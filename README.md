@@ -1,2 +1,2 @@
-# addit-eos-contract
-addit eosio smart contract
+# Smart Contract for Addit
+> Work in Progress...
