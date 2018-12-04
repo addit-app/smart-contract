@@ -1,8 +1,8 @@
-PROJECT=additeosioap/additeosioap
+PROJECT=eosadditapps/eosadditapps
 CLEOS=cli set contract
-SOURCE=additeosioap
+SOURCE=eosadditapps
 CPP=/usr/local/bin/eosio-cpp
-ACCOUNT=additeosioap
+ACCOUNT=eosadditapps
 ABIGEN=/usr/local/bin/eosio-abigen
 
 all: wasm abi clear build
