@@ -55,5 +55,5 @@ dkms.conf
 .vscode/
 initial
 logs/
-additeosioap/additeosioap.wasm
-additeosioap/additeosioap.abi
+eosadditapps/eosadditapps.wasm
+eosadditapps/eosadditapps.abi
