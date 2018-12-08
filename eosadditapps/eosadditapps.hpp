@@ -1,9 +1,9 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
-#include <eosiolib/time.hpp>
+#include <eosiolib/transaction.hpp>
 
 using namespace eosio;
-using namespace std;
+using std::string;
 
 CONTRACT eosadditapps : public eosio::contract
 {
@@ -11,84 +11,129 @@ CONTRACT eosadditapps : public eosio::contract
         const char *tokensymbol = "ADDIT";
         const int8_t UPVOTE = 1;
         const int8_t DOWNVOTE = -1;
+        const int8_t DEFAULTVOTE = 0;
 
     public:
         using contract::contract;
         eosadditapps(name receiver, name code, datastream<const char *> ds)
             : contract(receiver, code, ds) {}
 
-        // Action
-        ACTION signup(name account, vector<string> nickname, vector<string> avatar, vector<string> memo);
-        ACTION addit(name account, uint64_t iopinion, vector<string> url, vector<string> comment);
+        // addit Action
+        ACTION signup(name account, string nickname, string avatar, string memo);
+        ACTION addit(name account, int64_t iopinion, string url, string comment);
         ACTION del(name account, uint64_t iopinion, uint64_t icomment);
         ACTION vote(name account, uint64_t iopinion, uint64_t icomment, int8_t vote);
         ACTION repute(name account, uint64_t iopinion, int8_t repute);
+        
+        // token Action
+        ACTION create(name issuer, asset max_supply);
+        ACTION issue(asset quantity, string memo);
+    	ACTION transfer(name from, name to, asset quantity, string memo);
+        ACTION burn(name account, asset quantity, string memo);
 
         using signup_action = action_wrapper<"signup"_n, &eosadditapps::signup>;
         using addit_action = action_wrapper<"addit"_n, &eosadditapps::addit>;
         using del_action = action_wrapper<"del"_n, &eosadditapps::del>;
         using vote_action = action_wrapper<"vote"_n, &eosadditapps::vote>;
         using repute_action = action_wrapper<"repute"_n, &eosadditapps::repute>;
+        
+        using create_action = action_wrapper<"create"_n, &eosadditapps::create>;
+        using issue_action = action_wrapper<"issue"_n, &eosadditapps::issue>;
+        using transfer_action = action_wrapper<"transfer"_n, &eosadditapps::transfer>;
+        using burn_action = action_wrapper<"burn"_n, &eosadditapps::burn>;
 
         // Table
+        // 사용자 정보
         TABLE user {
             name account;
-            vector<string> nickname;
-            vector<string> memo;
-            vector<string> avatar;
+            string nickname;
+            string memo;
+            string avatar;
+            int64_t repute;
 
             uint64_t primary_key()const { return account.value; }
         };
         using users_index = multi_index<"user"_n, user>;
 
+        // 코멘트별 대한 vote 기록
         TABLE voting {
             uint64_t index;
             name account;
             int8_t vote;
-            block_timestamp blocktime;
+            asset balance;
+            uint64_t blocktime;
 
             uint64_t primary_key() const { return account.value; }
         };
         using votings_index = multi_index<"voting"_n, voting>;
 
+        // url별 대한 평판 기록
         TABLE reputation {
             uint64_t index;
             name account;
             int8_t vote;
-            block_timestamp blocktime;
+            uint64_t blocktime;
 
             uint64_t primary_key() const { return account.value; }
         };
         using reputations_index = multi_index<"reputation"_n, reputation>;
 
+        // url에 대한 코멘트(의견)    
         TABLE comments {
             uint64_t index;
             name account;
-            vector<string> comment;
+            string comment;
             uint32_t upvote;
             uint32_t downvote;
-            block_timestamp blocktime;
+            uint64_t blocktime;
 
             uint64_t primary_key() const { return index; }
         };
         using comments_index = multi_index<"comments"_n, comments>;
 
+        // url에 대한 평판  
         TABLE opinion {
             uint64_t index;
-            vector<string> url;
+            string url;
             int64_t repvalue;
-            block_timestamp blocktime;
+            uint64_t blocktime;
 
-            vector<string> primary_key() const { return url; }
+            uint64_t primary_key() const { return index; }
         };
         using opinions_index = multi_index<"opinion"_n, opinion>;
 
+        // url의 index 정보조회용 테이블
         TABLE domain {
             uint64_t index;
             uint64_t urls;
-            vector<string> url;
+            string url;
 
             uint64_t primary_key() const { return index; }
         };
         using domains_index = multi_index<"domain"_n, domain>;
+
+        TABLE account {
+            asset balance;
+
+            uint64_t primary_key() const { return balance.symbol.code().raw(); }
+        };
+        using account_index = eosio::multi_index<"accounts"_n, account>;
+
+        TABLE currency_stats {
+            asset supply;
+            asset max_supply;
+            name issuer;
+
+            uint64_t primary_key() const { return supply.symbol.code().raw(); }
+            uint64_t get_issuer() const { return issuer.value; }
+        };
+        using currency_index = eosio::multi_index<"stat"_n, currency_stats, indexed_by< "byissuer"_n, const_mem_fun< currency_stats, uint64_t, &currency_stats::get_issuer> > >;
+
+    private:
+        void sub_balance(name owner, asset value);
+        void add_balance(name owner, asset value, name ram_payer);
+        void sub_supply(asset quantity);
+        void add_supply(asset quantity);
+        asset calc_reward(uint64_t opinion, uint64_t comment);
+        int select_vote(uint8_t old_vote, uint8_t new_vote);
 };
