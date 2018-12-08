@@ -55,5 +55,3 @@ dkms.conf
 .vscode/
 initial
 logs/
-eosadditapps/eosadditapps.wasm
-eosadditapps/eosadditapps.abi
