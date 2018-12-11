@@ -344,6 +344,7 @@ namespace addit {
                             // up, up
                             c.upvote -= 1;
                             c.vote[index].balance = balance;
+                            c.vote[index].vote = 0;
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
@@ -353,6 +354,7 @@ namespace addit {
                             c.upvote -= 1;
                             c.downvote += 1;
                             c.vote[index].balance = balance;
+                            c.vote[index].vote = DOWNVOTE;
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
@@ -361,12 +363,14 @@ namespace addit {
                             // down, down
                             c.downvote -= 1;
                             c.vote[index].balance = balance;
+                            c.vote[index].vote = 0;
                             break;
                         case 4:
                             // down, up
                             c.upvote += 1;
                             c.downvote -= 1;
                             c.vote[index].balance = reward;
+                            c.vote[index].vote = UPVOTE;
 
                             add_supply( reward );
                             add_balance( c.account, reward, _self );
@@ -375,6 +379,7 @@ namespace addit {
                             if (vote == UPVOTE) {
                                 c.upvote += 1;
                                 c.vote[index].balance = reward;
+                                c.vote[index].vote = vote;
 
                                 add_supply( reward );
                                 add_balance( c.account, reward, _self );
@@ -385,7 +390,7 @@ namespace addit {
                             break;
                     }
 
-                    c.vote[index].vote = vote;
+                    
                     c.vote[index].blocktime = blocktime;
                     flag = false;
                     break;
