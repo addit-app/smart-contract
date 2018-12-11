@@ -1,5 +1,5 @@
 {
-    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Sat Dec  8 16:06:08 2018",
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT Tue Dec 11 18:11:39 2018",
     "version": "eosio::abi/1.1",
     "structs": [
         {
@@ -69,15 +69,19 @@
                     "type": "string"
                 },
                 {
-                    "name": "upvote",
-                    "type": "uint32"
-                },
-                {
-                    "name": "downvote",
-                    "type": "uint32"
+                    "name": "vote",
+                    "type": "voting[]"
                 },
                 {
                     "name": "blocktime",
+                    "type": "uint64"
+                },
+                {
+                    "name": "upvote",
+                    "type": "uint64"
+                },
+                {
+                    "name": "downvote",
                     "type": "uint64"
                 }
             ]
@@ -141,10 +145,6 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "urls",
-                    "type": "uint64"
-                },
-                {
                     "name": "url",
                     "type": "string"
                 }
@@ -181,26 +181,8 @@
                     "type": "int64"
                 },
                 {
-                    "name": "blocktime",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "reputation",
-            "base": "",
-            "fields": [
-                {
-                    "name": "index",
-                    "type": "uint64"
-                },
-                {
-                    "name": "account",
-                    "type": "name"
-                },
-                {
-                    "name": "vote",
-                    "type": "int8"
+                    "name": "repute",
+                    "type": "rlog[]"
                 },
                 {
                     "name": "blocktime",
@@ -223,6 +205,24 @@
                 {
                     "name": "repute",
                     "type": "int8"
+                }
+            ]
+        },
+        {
+            "name": "rlog",
+            "base": "",
+            "fields": [
+                {
+                    "name": "voter",
+                    "type": "name"
+                },
+                {
+                    "name": "vote",
+                    "type": "int8"
+                },
+                {
+                    "name": "blocktime",
+                    "type": "uint64"
                 }
             ]
         },
@@ -323,11 +323,7 @@
             "base": "",
             "fields": [
                 {
-                    "name": "index",
-                    "type": "uint64"
-                },
-                {
-                    "name": "account",
+                    "name": "voter",
                     "type": "name"
                 },
                 {
@@ -423,13 +419,6 @@
             "key_types": []
         },
         {
-            "name": "reputation",
-            "type": "reputation",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "stat",
             "type": "currency_stats",
             "index_type": "i64",
@@ -439,13 +428,6 @@
         {
             "name": "user",
             "type": "user",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "voting",
-            "type": "voting",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
