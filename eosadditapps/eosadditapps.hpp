@@ -1,6 +1,5 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
-#include <eosiolib/transaction.hpp>
 
 using namespace eosio;
 using namespace std;
@@ -26,7 +25,7 @@ namespace addit {
             ACTION repute(name account, uint64_t iopinion, int8_t repute);
             
             // token Action
-            ACTION create(name issuer, asset max_supply);
+            ACTION create(asset max_supply);
             ACTION issue(asset quantity, string memo);
             ACTION transfer(name from, name to, asset quantity, string memo);
             ACTION burn(name account, asset quantity, string memo);

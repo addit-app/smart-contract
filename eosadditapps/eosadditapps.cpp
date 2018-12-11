@@ -108,7 +108,7 @@ namespace addit {
         cidx.erase( citr );
     }
 
-    ACTION eosadditapps::create( name issuer, asset max_supply ) {
+    ACTION eosadditapps::create( asset max_supply ) {
         require_auth( _self );
 
         asset supply(0, symbol( symbol_code( tokensymbol ), 4) );

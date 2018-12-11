@@ -95,7 +95,7 @@ cli get table eosadditapps 3 opinion
 cli push action eosadditapps create '["violetstairn", "1000000000.0000 ADDIT"]' -p eosadditapps@active
 
 # get table
-cli get currency stats violetstairn ADDIT
+cli get currency stats eosadditapps ADDIT
 ```
 
 ## issue
