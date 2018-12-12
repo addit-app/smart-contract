@@ -19,20 +19,19 @@ namespace addit {
                 u.avatar = avatar;
                 u.repute = 1000;
             });
+
+            // initial reward 100.0000 ADDIT
+            asset balance(1000000, symbol( symbol_code( tokensymbol ), 4) );
+            add_supply( balance );
+            add_balance( account, balance, account );
         } else {
             // update user account information
             uidx.modify( itr, _self, [&]( auto& u ) {
-                u.account = account;
                 u.nickname = nickname;
                 u.memo = memo;
                 u.avatar = avatar;
             });
         }
-
-        // initial reward 100.0000 ADDIT
-        asset balance(1000000, symbol( symbol_code( tokensymbol ), 4) );
-        add_supply( balance );
-        add_balance( account, balance, account );
     }
 
     ACTION eosadditapps::addit(name account, int64_t iopinion, string url, string comment) {
@@ -254,7 +253,7 @@ namespace addit {
         auto ditr = didx.find( iopinion );
         eosio_assert( ditr != didx.end(), "failed find opinion url" );
 
-        // repute에서 account의 기록이 있는지 체크
+        // opinon index 체크
         opinions_index oidx( _self, iopinion );
         auto oitr = oidx.find( iopinion );
         eosio_assert( oitr != oidx.end(), "failed find opinions" );
@@ -268,22 +267,22 @@ namespace addit {
                     switch ( slc ) {  
                         case 1:
                             // up, up
-                            o.repvalue = oitr->repvalue - 1;
+                            o.repvalue -= 1;
                             o.repute[index].vote = 0;
                             break;
                         case 2:  
                             // up, down
-                            o.repvalue = oitr->repvalue - 2;
+                            o.repvalue -= 2;
                             o.repute[index].vote = DOWNVOTE;
                             break;
                         case 3:
                             // down, down
-                            o.repvalue = oitr->repvalue + 1;
+                            o.repvalue += 1;
                             o.repute[index].vote = 0;
                             break;
                         case 4:
                             // down, up
-                            o.repvalue = oitr->repvalue + 2;
+                            o.repvalue += 2;
                             o.repute[index].vote = UPVOTE;
                             break;
                         default:
@@ -318,7 +317,6 @@ namespace addit {
         uint64_t blocktime = publication_time();
         uint32_t comment_upvote;
         uint32_t comment_downvote;
-        int64_t user_repute;
         asset balance(0, symbol( symbol_code( tokensymbol ), 4) );
 
         bool flag = true;
@@ -331,6 +329,7 @@ namespace addit {
         comments_index cidx( _self, iopinion );
         auto citr = cidx.find( icomment );
         eosio_assert( citr->account.value != account.value, "can't vote your self" );
+
 
 
         cidx.modify( citr, _self, [&]( auto& c ) {
@@ -348,6 +347,7 @@ namespace addit {
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
+                            user_repute( account, -1);
                             break;
                         case 2:
                             // up, down
@@ -358,12 +358,14 @@ namespace addit {
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
+                            user_repute( account, -2);
                             break;
                         case 3:
                             // down, down
                             c.downvote -= 1;
                             c.vote[index].balance = balance;
                             c.vote[index].vote = 0;
+                            user_repute( account, 1);
                             break;
                         case 4:
                             // down, up
@@ -374,6 +376,7 @@ namespace addit {
 
                             add_supply( reward );
                             add_balance( c.account, reward, _self );
+                            user_repute( account, 2);
                             break;
                         default:
                             if (vote == UPVOTE) {
@@ -387,10 +390,10 @@ namespace addit {
                                 c.downvote += 1;
                                 c.vote[index].balance = balance;
                             }
+                            user_repute( account, vote);
                             break;
                     }
 
-                    
                     c.vote[index].blocktime = blocktime;
                     flag = false;
                     break;
@@ -435,6 +438,15 @@ namespace addit {
         asset balance(b, symbol( symbol_code( tokensymbol ), 4) );
 
         return balance;
+    }
+
+    void eosadditapps::user_repute( name account, int64_t repute ) {
+        users_index uidx( _self, account.value );
+        auto uitr = uidx.find(account.value);
+        uidx.modify( uitr, _self, [&]( auto& u ) {
+            u.repute += repute;
+        });
+
     }
 
     int8_t eosadditapps::select_vote( uint8_t old_vote, uint8_t new_vote ) {

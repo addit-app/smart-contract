@@ -128,6 +128,7 @@ namespace addit {
             void sub_supply(asset quantity);
             void add_supply(asset quantity);
             asset calc_reward(name account);
+            void user_repute(name account, int64_t repute);
             int8_t select_vote(uint8_t old_vote, uint8_t new_vote);
     };
 } // addit
