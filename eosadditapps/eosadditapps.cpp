@@ -192,28 +192,28 @@ namespace addit {
     }
 
     void eosadditapps::sub_balance( name owner, asset value ) {
-        account_index from_acnts( _self, owner.value );
-        const auto& from = from_acnts.get( value.symbol.code().raw(), "no balance object found" );
+        account_index accounts( _self, owner.value );
+        const auto& from = accounts.get( value.symbol.code().raw(), "no balance object found" );
         eosio_assert( from.balance.amount >= value.amount, "overdrawn balance" );
 
         if( from.balance.amount == value.amount ) {
-            from_acnts.erase( from );
+            accounts.erase( from );
         } else {
-            from_acnts.modify( from, owner, [&]( auto& a ) {
+            accounts.modify( from, _self, [&]( auto& a ) {
                 a.balance -= value;
             });
         }
     }
 
     void eosadditapps::add_balance( name owner, asset value, name ram_payer ) {
-        account_index to_accounts( _self, owner.value );
-        auto to = to_accounts.find( value.symbol.code().raw() );
-        if( to == to_accounts.end() ) {
-            to_accounts.emplace( ram_payer, [&]( auto& a ){
+        account_index accounts( _self, owner.value );
+        auto to = accounts.find( value.symbol.code().raw() );
+        if( to == accounts.end() ) {
+            accounts.emplace( ram_payer, [&]( auto& a ){
                 a.balance = value;
             });
         } else {
-            to_accounts.modify( to, _self, [&]( auto& a ) {
+            accounts.modify( to, _self, [&]( auto& a ) {
                 a.balance += value;
             });
         }
@@ -330,8 +330,6 @@ namespace addit {
         auto citr = cidx.find( icomment );
         eosio_assert( citr->account.value != account.value, "can't vote your self" );
 
-
-
         cidx.modify( citr, _self, [&]( auto& c ) {
             for (int index = 0; index < c.vote.size(); index++) {
                 if (c.vote[index].voter.value == account.value) {
@@ -365,6 +363,7 @@ namespace addit {
                             c.downvote -= 1;
                             c.vote[index].balance = balance;
                             c.vote[index].vote = 0;
+                            
                             user_repute( account, 1);
                             break;
                         case 4:
@@ -375,7 +374,7 @@ namespace addit {
                             c.vote[index].vote = UPVOTE;
 
                             add_supply( reward );
-                            add_balance( c.account, reward, _self );
+                            add_balance( c.account, reward, c.account );
                             user_repute( account, 2);
                             break;
                         default:
@@ -385,10 +384,11 @@ namespace addit {
                                 c.vote[index].vote = vote;
 
                                 add_supply( reward );
-                                add_balance( c.account, reward, _self );
+                                add_balance( c.account, reward, c.account );
                             } else {
                                 c.downvote += 1;
                                 c.vote[index].balance = balance;
+                                c.vote[index].vote = vote;
                             }
                             user_repute( account, vote);
                             break;
@@ -449,7 +449,7 @@ namespace addit {
 
     }
 
-    int8_t eosadditapps::select_vote( uint8_t old_vote, uint8_t new_vote ) {
+    int8_t eosadditapps::select_vote( int8_t old_vote, int8_t new_vote ) {
         if (old_vote == DEFAULTVOTE) {
             return 0;
         } else if (old_vote == UPVOTE && new_vote == UPVOTE ) {
