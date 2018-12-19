@@ -345,7 +345,7 @@ namespace addit {
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
-                            user_repute( account, -1);
+                            user_repute( c.account, -1 );
                             break;
                         case 2:
                             // up, down
@@ -356,15 +356,15 @@ namespace addit {
 
                             sub_supply( reward );
                             sub_balance( c.account, reward );
-                            user_repute( account, -2);
+                            user_repute( c.account, -2 );
                             break;
                         case 3:
                             // down, down
                             c.downvote -= 1;
                             c.vote[index].balance = balance;
                             c.vote[index].vote = 0;
-                            
-                            user_repute( account, 1);
+
+                            user_repute( c.account, 1 );
                             break;
                         case 4:
                             // down, up
@@ -375,7 +375,7 @@ namespace addit {
 
                             add_supply( reward );
                             add_balance( c.account, reward, c.account );
-                            user_repute( account, 2);
+                            user_repute( c.account, 2 );
                             break;
                         default:
                             if (vote == UPVOTE) {
@@ -390,7 +390,8 @@ namespace addit {
                                 c.vote[index].balance = balance;
                                 c.vote[index].vote = vote;
                             }
-                            user_repute( account, vote);
+
+                            user_repute( c.account, vote );
                             break;
                     }
 
