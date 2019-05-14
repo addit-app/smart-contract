@@ -3,7 +3,7 @@
 namespace addit {
     ACTION eosadditapps::signup(name account, string nickname, string avatar, string memo) {
         require_auth( account );
-        
+
         eosio_assert( nickname.size() <= 32, "nickname has more than 32 bytes" );
         eosio_assert( avatar.size() <= 256, "avatar link size has more than 256 bytes" );
         eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
@@ -54,7 +54,7 @@ namespace addit {
         eosio_assert( comment.size() <= 256, "comment has more than 256 bytes" );
 
         uint64_t blocktime = publication_time();
-        
+
         if (iopinion < 0) {
             // insert url to domains_index
             domains_index didx( _self, _self.value );
@@ -89,13 +89,13 @@ namespace addit {
 
     ACTION eosadditapps::del(name account, uint64_t iopinion, uint64_t icomment) {
         require_auth( account );
-        
+
         // payment 5 ADDIT
         asset balance(50000, symbol( symbol_code( tokensymbol ), 4) );
         account_index accounts( _self, account.value );
         auto uitr = accounts.find( balance.symbol.code().raw() );
         eosio_assert( uitr->balance.amount > balance.amount, "not enough balance" );
-        
+
         sub_balance( account, balance );
         sub_supply( balance );
 
@@ -113,7 +113,7 @@ namespace addit {
         asset supply(0, symbol( symbol_code( tokensymbol ), 4) );
         auto symbol = supply.symbol;
         max_supply.symbol = symbol;
-        
+
         auto symbol_name = symbol.code().raw();
         currency_index currency_table( _self, symbol_name );
         auto existing_currency = currency_table.find( symbol_name );
@@ -264,13 +264,13 @@ namespace addit {
                 if (o.repute[index].voter.value == account.value) {
                     flag = false;
                     int8_t slc = select_vote(o.repute[index].vote, repute);
-                    switch ( slc ) {  
+                    switch ( slc ) {
                         case 1:
                             // up, up
                             o.repvalue -= 1;
                             o.repute[index].vote = 0;
                             break;
-                        case 2:  
+                        case 2:
                             // up, down
                             o.repvalue -= 2;
                             o.repute[index].vote = DOWNVOTE;
@@ -329,8 +329,6 @@ namespace addit {
         comments_index cidx( _self, iopinion );
         auto citr = cidx.find( icomment );
         eosio_assert( citr->account.value != account.value, "can't vote your self" );
-
-
 
         cidx.modify( citr, _self, [&]( auto& c ) {
             for (int index = 0; index < c.vote.size(); index++) {

@@ -1,5 +1,5 @@
 PROJECT=eosadditapps/eosadditapps
-CLEOS=cli set contract
+CLEOS=cleos set contract
 SOURCE=eosadditapps
 CPP=/usr/local/bin/eosio-cpp
 ACCOUNT=eosadditapps
